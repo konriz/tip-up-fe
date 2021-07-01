@@ -1,21 +1,29 @@
 <template>
   <div id="app">
-    <jars-view/>
-    <login-view/>
+    <login-view @login="updateAuthorized"/>
+    <div id="unauthorized-message" v-if="!isAuthorized">You need to login first</div>
+    <jars-view v-else/>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
 import JarsView from "@/components/JarsView.vue";
 import LoginView from "@/components/LoginView.vue";
+import { Component, Mixins } from "vue-mixin-decorator";
+import { AuthorizationMixin } from "@/mixin/AuthorizationMixin";
 
 @Component({
   components: {
     LoginView, JarsView,
   },
 })
-export default class App extends Vue {
+export default class App extends Mixins<AuthorizationMixin>(AuthorizationMixin) {
+
+  private isAuthorized = false;
+
+  private updateAuthorized() {
+    this.isAuthorized = this.authorized();
+  }
 }
 </script>
 

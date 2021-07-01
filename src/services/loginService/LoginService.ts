@@ -3,12 +3,11 @@ import { APIURL } from "@/main";
 import { Owner } from "@/services/jarsService/Owner";
 
 export class LoginService {
-  static async login(login: string, secret: string) {
-    return login;
+  static async login(owner: Owner): Promise<Owner> {
+    return Axios.post<Owner>(APIURL + "/login", owner).then(result => result.data).catch(() => Promise.reject());
   }
 
-  static async register(login: string, secret: string) {
-    const owner: Owner = {name: login, secret};
+  static async register(owner: Owner) {
     return Axios.post(APIURL + "/owners", owner);
   }
 

@@ -1,7 +1,10 @@
 <template>
   <div class="single-jar">
     <div class="button-container">
-      <button @click="sendTip"><img alt="Vue logo" src="../assets/cash.png" width="75"></button>
+      <button @click="sendTip" :disabled="!canTip(ownerName)" :class="canTip(ownerName) ? '' : 'button-disabled'"><img
+          alt="Vue logo"
+          src="../assets/cash.png"
+          width="75"></button>
     </div>
     <div><img alt="Vue logo" src="../assets/jar.png" width="180"></div>
     <div class="user-label">{{ ownerName }}</div>
@@ -21,12 +24,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
 import { Tip } from "@/services/jarsService/Tip";
 import { JarsService } from "@/services/jarsService/JarsService";
+import { CanTipMixin } from "@/mixin/CanTipMixin";
+import { Component, Mixins } from "vue-mixin-decorator";
+import { Prop } from "vue-property-decorator";
 
 @Component
-export default class SingleJar extends Vue {
+export default class SingleJar extends Mixins<CanTipMixin>(CanTipMixin) {
 
   @Prop() ownerName!: string;
   @Prop() tipsReceived!: Tip[];
@@ -45,8 +50,16 @@ export default class SingleJar extends Vue {
   }
 
   private sendTip() {
-    const tip: Tip = {from: {name: "User"}, to: {name: this.ownerName}, amount: 10, message: ""}
-    JarsService.sendTip(tip);
+    if (!this.$userStore.user) {
+      return alert("You must be logged in")
+    }
+    const tip: Tip = {
+      from: {name: this.$userStore.user?.name, secret: this.$userStore.user?.secret},
+      to: {name: this.ownerName},
+      amount: 10,
+      message: "Tip for you!"
+    }
+    JarsService.sendTip(tip).then(() => this.$emit("refresh")).catch((error) => alert(error));
   }
 }
 </script>
@@ -87,5 +100,9 @@ export default class SingleJar extends Vue {
   display: inline-block;
   padding: 5px;
   font-size: 36px;
+}
+
+.button-disabled {
+  filter: grayscale(100%);
 }
 </style>
