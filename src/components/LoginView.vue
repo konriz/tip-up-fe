@@ -3,10 +3,18 @@
     <h3>User panel</h3>
     <div>{{ username }}</div>
     <div>
+      <input type="checkbox" v-model="registerMode"> Register
+    </div>
+    <div v-if="registerMode">
+      <input placeholder="Name" v-model="registerName">
+      <input placeholder="Secret" type="password" v-model="registerSecret">
+      <input placeholder="Repeat secret" type="password" v-model="registerSecretRepeat">
+      <button @click="register">Register</button>
+    </div>
+    <div v-else>
       <input placeholder="Name" v-model="name">
       <input placeholder="Secret" type="password" v-model="secret">
       <button @click="loginUser">Login</button>
-      <button @click="register">Register</button>
       <button @click="logout">Logout</button>
     </div>
   </div>
@@ -22,6 +30,11 @@ export default class LoginView extends Vue {
   private name = "";
   private secret = "";
   private username = "";
+
+  private registerMode = false;
+  private registerName = "";
+  private registerSecret = ""
+  private registerSecretRepeat = "";
 
   private async loginUser() {
     this.$userStore.user = await LoginService.login({name: this.name, secret: this.secret})
@@ -43,9 +56,7 @@ export default class LoginView extends Vue {
       this.$userStore.user = undefined;
       this.setUserName("");
       this.$emit("login");
-
     });
-
   }
 
   private setUserName(username: string) {
