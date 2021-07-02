@@ -1,27 +1,30 @@
 <template>
   <div class="user-panel">
     <h3>User panel</h3>
-    <div>{{ username }}</div>
-    <div>
-      <input type="checkbox" v-model="registerMode"> Register
-    </div>
-    <div v-if="registerMode">
-      <input placeholder="Name" v-model="registerName">
-      <input placeholder="Secret" type="password" v-model="registerSecret">
-      <input placeholder="Repeat secret" type="password" v-model="registerSecretRepeat">
-      <button @click="register">Register</button>
+    <div v-if="username">{{ username }}
+      <button @click="logout">Logout</button>
     </div>
     <div v-else>
-      <input placeholder="Name" v-model="name">
-      <input placeholder="Secret" type="password" v-model="secret">
-      <button @click="loginUser">Login</button>
-      <button @click="logout">Logout</button>
+      <div>
+        <input type="checkbox" v-model="registerMode"> Register
+      </div>
+      <div v-if="registerMode">
+        <input placeholder="Name" v-model="registerName">
+        <input placeholder="Secret" type="password" v-model="registerSecret">
+        <input placeholder="Repeat secret" type="password" v-model="registerSecretRepeat">
+        <button @click="register">Register</button>
+      </div>
+      <div v-else>
+        <input placeholder="Name" v-model="name">
+        <input placeholder="Secret" type="password" v-model="secret">
+        <button @click="loginUser">Login</button>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Watch } from "vue-property-decorator";
 import { LoginService } from "@/services/loginService/LoginService";
 
 @Component
@@ -36,9 +39,28 @@ export default class LoginView extends Vue {
   private registerSecret = ""
   private registerSecretRepeat = "";
 
+  @Watch("registerMode") clearForms() {
+    this.clearLoginForm();
+    this.clearRegisterForm();
+  }
+
+  private clearLoginForm() {
+    this.name = "";
+    this.secret = "";
+  }
+
+  private clearRegisterForm() {
+    this.registerName = "";
+    this.registerSecret = "";
+    this.registerSecretRepeat = "";
+  }
+
   private async loginUser() {
     this.$userStore.user = await LoginService.login({name: this.name, secret: this.secret})
-        .then(credentials => credentials)
+        .then(credentials => {
+          this.clearForms();
+          return credentials;
+        })
         .catch(() => {
           alert("Login failed");
           return undefined;
@@ -48,7 +70,11 @@ export default class LoginView extends Vue {
   }
 
   private register() {
-    LoginService.register({name: this.name, secret: this.secret});
+    LoginService.register({name: this.registerName, secret: this.registerSecret}).then(() => {
+      this.clearForms();
+      this.registerMode = false;
+      alert("Register success!");
+    }).catch(() => alert("Failed to register"));
   }
 
   private logout() {
@@ -72,5 +98,6 @@ export default class LoginView extends Vue {
   border-radius: 10px;
   padding: 10px;
   display: inline-block;
+  width: 1000px;
 }
 </style>
