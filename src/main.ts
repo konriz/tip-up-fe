@@ -5,6 +5,7 @@ import { UserStorePlugin } from "@/store/UserStorePlugin";
 Vue.config.productionTip = false;
 
 const APIURL = process.env.VUE_APP_APIURL || "http://localhost:3000";
+console.log('App url : ' + APIURL);
 
 Vue.use(new UserStorePlugin());
 
