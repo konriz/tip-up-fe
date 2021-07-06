@@ -56,22 +56,22 @@ export default class LoginView extends Vue {
   }
 
   private async loginUser() {
-    this.$userStore.user = await LoginService.login({name: this.name, secret: this.secret})
-        .then(credentials => {
+    LoginService.login({name: this.name, secret: this.secret})
+        .then(() => {
+          this.$userStore.user = {name: this.name, secret: this.secret};
           this.clearForms();
-          return credentials;
         })
         .catch(() => {
           alert("Login failed");
-          return undefined;
-        });
-    this.setUserName(this.$userStore.user?.name || "");
-    this.$emit("login");
+          this.$userStore.user = undefined;
+        }).finally(() => {
+      this.setUserName(this.$userStore.user?.name || "");
+      this.$emit("login");
+    });
   }
 
   private register() {
     LoginService.register({name: this.registerName, secret: this.registerSecret}).then(() => {
-      this.clearForms();
       this.registerMode = false;
       alert("Register success!");
     }).catch(() => alert("Failed to register"));
