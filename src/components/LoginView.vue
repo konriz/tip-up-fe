@@ -9,15 +9,19 @@
         <input type="checkbox" v-model="registerMode"> Register
       </div>
       <div v-if="registerMode">
-        <input placeholder="Name" v-model="registerName">
-        <input placeholder="Secret" type="password" v-model="registerSecret">
-        <input placeholder="Repeat secret" type="password" v-model="registerSecretRepeat">
-        <button @click="register">Register</button>
+        <form @submit.prevent="register">
+          <input placeholder="Name" required v-model="registerName">
+          <input placeholder="Secret" required type="password" v-model="registerSecret">
+          <input placeholder="Repeat secret" required type="password" v-model="registerSecretRepeat">
+          <button type="submit">Register</button>
+        </form>
       </div>
       <div v-else>
-        <input placeholder="Name" v-model="name">
-        <input placeholder="Secret" type="password" v-model="secret">
-        <button @click="loginUser">Login</button>
+        <form @submit.prevent="loginUser">
+          <input placeholder="Name" required v-model="name">
+          <input placeholder="Secret" required type="password" v-model="secret">
+          <button type="submit">Login</button>
+        </form>
       </div>
     </div>
   </div>
@@ -71,6 +75,9 @@ export default class LoginView extends Vue {
   }
 
   private register() {
+    if (this.registerSecret != this.registerSecretRepeat) {
+      return alert("Secrets doesn't match");
+    }
     LoginService.register({name: this.registerName, secret: this.registerSecret}).then(() => {
       this.registerMode = false;
       alert("Register success!");
