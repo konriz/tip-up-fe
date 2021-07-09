@@ -59,7 +59,7 @@ export default class SingleJar extends Mixins<CanTipMixin>(CanTipMixin) {
       amount: 10,
       message: "Tip for you!"
     }
-    JarsService.sendTip(tip).then(() => this.$emit("refresh")).catch((error) => alert(error));
+    JarsService.sendTip(tip).then(() => this.$emit("refresh", tip)).catch((error) => alert(error));
   }
 }
 </script>

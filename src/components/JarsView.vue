@@ -7,7 +7,7 @@
       </div>
       <div v-if="downloading" class="spinner"></div>
       <single-jar v-for="jar of jars" :key="jar.owner.name" :ownerName="jar.owner.name" :tips-given="jar.tipsGiven"
-                  :tips-received="jar.tipsReceived" @refresh="downloadJars"></single-jar>
+                  :tips-received="jar.tipsReceived" @refresh="updateJars"></single-jar>
     </div>
   </div>
 
@@ -18,6 +18,7 @@ import SingleJar from "@/components/SingleJar.vue";
 import { JarDto } from "@/services/jarsService/JarDto";
 import { JarsService } from "@/services/jarsService/JarsService";
 import { Component, Vue } from "vue-property-decorator";
+import { Tip } from "@/services/jarsService/Tip";
 
 @Component({
   components: {SingleJar}
@@ -32,14 +33,27 @@ export default class JarsView extends Vue {
     this.downloadJars();
   }
 
-  private downloadJars() {
-    this.jars = [];
+  downloadJars() {
     this.downloading = true;
     this.downloadError = false;
     JarsService.getJars().then(jars => {
+      this.jars = [];
       this.jars.push(...jars)
     }).catch(() => this.downloadError = true).finally(() => this.downloading = false);
   }
+
+  updateJars(tip: Tip) {
+    const fromJar = this.jars.find(jar => jar.owner.name === tip.from.name);
+    const toJar = this.jars.find(jar => jar.owner.name === tip.to.name);
+    console.log(fromJar, toJar);
+    if (!fromJar || !toJar) {
+      return this.downloadJars();
+    }
+
+    fromJar.tipsGiven.push(tip);
+    toJar.tipsReceived.push(tip);
+  }
+
 }
 </script>
 
